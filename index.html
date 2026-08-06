@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WEB - MCK (Spotify Layout)</title>
+    <title> MCK-HVL-ALBUM </title>
     <style>
         /* 📱 CHỈ ÁP DỤNG CHO ĐIỆN THOẠI (Màn hình < 768px) */
         @media (max-width: 768px) {
@@ -16,6 +16,27 @@
             }
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* Styling cho 2 nút tua 10s */
+.control-btn {
+    background: transparent;
+    border: none;
+    color: #b3b3b3;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.1s;
+    padding: 0 4px;
+}
+
+.control-btn:hover {
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+/* Đổi màu xanh lá cây Spotify cho nút Repeat/Shuffle khi bấm KÍCH HOẠT */
+.btn.active {
+    color: #1ed760 !important;
+}
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -171,6 +192,33 @@
 
         /* 📱 CSS RIÊNG DÀNH CHO ĐIỆN THOẠI (MÀN HÌNH < 768PX) */
         @media (max-width: 768px) {
+        body {
+                padding-bottom: 90px !important; /* Tạo khoảng trống ở đáy để không bị Player che */
+            }
+
+            /* Cố định trình phát nhạc luôn ở đáy màn hình */
+            .music-player, .player-bar, footer { 
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                width: 100% !important;
+                z-index: 9999 !important; /* Luôn hiển thị trên cùng */
+                background-color: #000000 !important; /* Phông nền đen chống đè chữ */
+            }
+
+            /* Thu gọn tên bài hát để không chèn lên nút chuyển bài */
+            .song-title, .track-title {
+                max-width: 110px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            /* Khoảng cách các nút bấm vừa vặn màn hình dọc */
+            .player-controls {
+                gap: 6px !important;
+            }
             .main-container { margin: 0; border-radius: 0; }
             
             .song-header {
@@ -255,10 +303,12 @@
     </div>
 
     <div class="player-center">
-        <div class="controls">
+       <div class="controls">
             <button id="shuffle-btn" class="btn" onclick="toggleShuffle()">🔀</button>
             <button class="btn" onclick="prevSong()">⏮</button>
+            <button class="btn control-btn" onclick="rewind10()" title="Tua lại 10s">⏪ 10s</button>
             <button class="btn btn-play" id="play-btn" onclick="togglePlay()">▶</button>
+            <button class="btn control-btn" onclick="forward10()" title="Tua nhanh 10s">⏩ 10s</button>
             <button class="btn" onclick="nextSong()">⏭</button>
             <button id="repeat-btn" class="btn" onclick="toggleRepeat()">🔁</button>
         </div>
@@ -868,56 +918,50 @@ Talk to me, babe`
             lyrics: `[Intro]
 Muốn đi, đi khắp nơi cả, cậu ấy
 Muốn sáng tạo
-Muốn là niềm cảm giác của cậu nên
-nhiều thứ lắm, mẹ, để mà nói câu chuyện muốn thì—
-Em không quen yêu trước khi
-không quen yêu trước đây
+Muốn là niềm cảm hứng của cậu luôn
+Nhiều thứ lắm, mẹ, để mà nói câu chuyện muốn thì—
+I don’t use to love before
+I don’t use to love before
 
 [Verse 1]
 Có lẽ biết như thế thì đã không yêu
-Cảm xúc đã không thỏa mãn
-Thổn thức biết điều bao bằng
-nghe xem con tim anh đặt điều đó
-có lẽ anh nghĩ ít hơn là
-dùng cảm xúc ít hơn
-Chắc chắn là cũng phải lí trí hơn
+Cảm xúc đã không phiêu
+Thổn thức biết bao đêm
+Nghe xem con tim anh đặt điều
+Có lẽ anh nên nghĩ ít hơn
+Dùng cảm xúc ít hơn
+Chắc là cũng phải lí trí hơn
 Có lẽ chuyện này cũng chỉ là vui thôi
-chỉ là một trò chơi thôi, anh thua rồi
-ngồi lại và nghe cùng anh chính
-nhẹ nhàng môi trường của em vào anh, thật nhanh trước khi
-Kim đồng hồ chỉ sang bên và em, em bé đi đi
-còn lại có anh ngạnh, đến thời gian
-Có
-mỗi anh sẽ, thời gian Có anh, thời gian Có biết anh
-đến thời gian
+Chỉ là một trò chơi thôi, anh thua rồi
+Ngồi lại và nghe cùng anh điệu valse cho sương rơi ướt mi
+Chạm nhẹ làn môi của em vào anh, thật nhanh trước khi
+Kim đồng hồ nhích sang bên và em, em bước đi
+Chỉ còn lại có mỗi anh ngẩn ngơ, đến quên thời gian
+Có mỗi anh ngẩn ngơ, quên thời gian
+Có mỗi anh ngẩn ngơ, quên thời gian
+Có biết anh ngẩn ngơ đến quên thời gian
+Đừng để anh ngẩn ngơ
 
-Bạn cũng có thể thích
-Là Gì Của Nhau
-RPT MCK
-Mắt Môi Tay.
-RPT MCK
-Nếu Như Ta thì Còn
-RPT MCK
-[Nhạc cụ Break]
+[Instrumental Break]
 
 [Verse 2]
 Có lẽ anh đã đúng khi vẫn yêu em
 Dù biết trước không nên
-Vì hình ấy thân quen
-Anh luôn là một ngày ta (Anh luôn sợ là một—)
-lại phải rời xa, anh đau
+Vì hình dáng ấy thân quen
+Anh luôn sợ là một ngày ta (Anh luôn sợ là một—)
+Lại phải rời xa, anh đau
 Có lẽ anh nên nghĩ ít hơn
-Dùng bàn tay của anh chỉ để ôm em
-Anh biết em không thể làm thinh với anh biết em
-đang làm em phát
-thì lại bàn tay
-vào nhau cho khi
-Kim đồng hồ sâu sang bên và ta nhổ ai muốn đi
-Và suy cần nói với nhau câu gì, cứ tan vào nhau
+Dùng bàn tay của anh chỉ để ôm lấy em
+Anh biết em chẳng thể làm thinh với anh
+Bởi vì là anh cũng đang làm em phát điên
+Vậy thì lại đan bàn tay vào nhau cho sương rơi ướt mi
+Chạm nhẹ làn môi của ta vào nhau thật nhanh trước khi
+Kim đồng hồ nhích sang bên và ta chẳng ai muốn đi
+Và chẳng cần nói với nhau câu gì, cứ tan vào nhau
 Nói với nhau câu gì, cứ tan vào nhau
-Nói với nhau câu gì, cứ tan vào
-nhau chút cần nói với nhau, cứ tan vào nhau
-cần nói với nhau`
+Nói với nhau câu gì, cứ tan vào nhau
+Chẳng cần nói với nhau, cứ tan vào nhau
+Chẳng cần nói với nhau`
         },
         {
             title: "11. Một Cái Ôm",
@@ -2365,9 +2409,22 @@ Suy nghĩ làm gì cho tốn thời gian`
     }
 
     function toggleRepeat() {
-        isRepeat = !isRepeat;
-        document.getElementById('repeat-btn').classList.toggle('active', isRepeat);
+    isRepeat = !isRepeat;
+    audio.loop = isRepeat; // Kích hoạt lặp lại bài hát cho HTML Audio
+    document.getElementById('repeat-btn').classList.toggle('active', isRepeat);
+}
+
+function forward10() {
+    if (audio && !isNaN(audio.duration)) {
+        audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
     }
+}
+
+function rewind10() {
+    if (audio) {
+        audio.currentTime = Math.max(0, audio.currentTime - 10);
+    }
+}
 
     function changeVolume() {
         audio.volume = volumeInput.value / 100;
@@ -2417,9 +2474,15 @@ Suy nghĩ làm gì cho tốn thời gian`
     }
 
     audio.addEventListener('ended', () => {
-        if (isRepeat) audio.play();
-        else nextSong();
-    });
+    if (isRepeat) {
+        audio.currentTime = 0; // Đưa nhạc về lại giây đầu tiên
+        audio.play();          // Phát lại bài hát ngay lập tức
+    } else if (isShuffle) {
+        playRandomSong();      // Phát ngẫu nhiên bài khác nếu bật shuffle
+    } else {
+        nextSong();            // Mặc định chuyển sang bài tiếp theo
+    }
+});
 
     loadSong(currentIndex);
 </script>
