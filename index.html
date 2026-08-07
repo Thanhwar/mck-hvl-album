@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title> MCK-HVL-ALBUM </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* 📱 CHỈ ÁP DỤNG CHO ĐIỆN THOẠI (Màn hình < 768px) */
         @media (max-width: 768px) {
@@ -16,28 +17,91 @@
             }
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        /* Styling cho 2 nút tua 10s */
-.control-btn {
-    background: transparent;
-    border: none;
-    color: #b3b3b3;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.2s, transform 0.1s;
-    padding: 0 4px;
-}
 
-.control-btn:hover {
-    color: #ffffff;
-    transform: scale(1.1);
-}
+        /* 🎨 CSS NÚT BẤM CHUẨN SPOTIFY */
+        .controls, .spotify-style-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
 
-/* Đổi màu xanh lá cây Spotify cho nút Repeat/Shuffle khi bấm KÍCH HOẠT */
-.btn.active {
-    color: #1ed760 !important;
-}
-        
+        .btn, .btn-spotify {
+            background: transparent;
+            border: none;
+            color: #b3b3b3;
+            font-size: 16px;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.1s ease;
+            padding: 6px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+        }
+
+        .btn:hover, .btn-spotify:hover, .control-btn:hover {
+            color: #ffffff !important;
+            transform: scale(1.08);
+        }
+
+        .btn:active, .btn-spotify:active, .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 🟢 Nút kích hoạt (Repeat / Shuffle bật) */
+        .btn.active, .btn-spotify.active {
+            color: #1ed760 !important;
+            position: relative;
+        }
+
+        /* Thêm chấm xanh dưới nút active */
+        .btn.active::after, .btn-spotify.active::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #1ed760;
+            border-radius: 50%;
+        }
+
+        /* 🔘 Nút PLAY / PAUSE to nổi bật */
+        .btn-play, .btn-play-spotify {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            font-size: 18px;
+            width: 42px !important;
+            height: 42px !important;
+            border-radius: 50%;
+        }
+
+        .btn-play:hover, .btn-play-spotify:hover {
+            transform: scale(1.06) !important;
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        /* ⏩⏪ Styling riêng nút Tua 10s */
+        .control-btn, .control-btn-10s {
+            background: transparent;
+            border: none;
+            color: #b3b3b3;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s, transform 0.1s;
+            padding: 0 4px;
+            width: auto;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #000000;
@@ -175,10 +239,6 @@
         .now-playing-artist { font-size: 0.7rem; color: #b3b3b3; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .player-center { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; max-width: 500px; }
-        .controls { display: flex; align-items: center; gap: 14px; }
-        .btn { background: none; border: none; color: #b3b3b3; font-size: 1rem; cursor: pointer; }
-        .btn.active { color: #1db954; }
-        .btn-play { background: #ffffff; color: #000; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 0.9rem; }
 
         .progress-container { display: flex; align-items: center; gap: 8px; width: 100%; }
         .time-text { font-size: 0.7rem; color: #a7a7a7; width: 30px; text-align: center; }
@@ -192,22 +252,20 @@
 
         /* 📱 CSS RIÊNG DÀNH CHO ĐIỆN THOẠI (MÀN HÌNH < 768PX) */
         @media (max-width: 768px) {
-        body {
-                padding-bottom: 90px !important; /* Tạo khoảng trống ở đáy để không bị Player che */
+            body {
+                padding-bottom: 90px !important;
             }
 
-            /* Cố định trình phát nhạc luôn ở đáy màn hình */
             .music-player, .player-bar, footer { 
                 position: fixed !important;
                 bottom: 0 !important;
                 left: 0 !important;
                 right: 0 !important;
                 width: 100% !important;
-                z-index: 9999 !important; /* Luôn hiển thị trên cùng */
-                background-color: #000000 !important; /* Phông nền đen chống đè chữ */
+                z-index: 9999 !important;
+                background-color: #000000 !important;
             }
 
-            /* Thu gọn tên bài hát để không chèn lên nút chuyển bài */
             .song-title, .track-title {
                 max-width: 110px;
                 white-space: nowrap;
@@ -215,10 +273,10 @@
                 text-overflow: ellipsis;
             }
 
-            /* Khoảng cách các nút bấm vừa vặn màn hình dọc */
-            .player-controls {
+            .controls {
                 gap: 6px !important;
             }
+
             .main-container { margin: 0; border-radius: 0; }
             
             .song-header {
@@ -239,7 +297,6 @@
             .lyrics-section { padding: 0 16px 24px 16px; }
             .lyric-text { font-size: 0.95rem; line-height: 1.6; }
 
-            /* Danh sách chờ biến thành menu trượt đè lên màn hình */
             .queue-panel {
                 position: absolute;
                 top: 0; right: 0; bottom: 0; left: 0;
@@ -249,12 +306,11 @@
             }
             .queue-panel.hidden-mobile { display: none !important; }
 
-            /* Nút âm lượng ẩn bớt trên điện thoại cho đỡ chật */
             .volume-container { display: none; }
             .player-right { width: auto; }
             .now-playing { width: 35%; }
         }
-    </style>
+</style>
 </head>
 <body>
 
@@ -303,14 +359,28 @@
     </div>
 
     <div class="player-center">
-       <div class="controls">
-            <button id="shuffle-btn" class="btn" onclick="toggleShuffle()">🔀</button>
-            <button class="btn" onclick="prevSong()">⏮</button>
-            <button class="btn control-btn" onclick="rewind10()" title="Tua lại 10s">⏪ 10s</button>
-            <button class="btn btn-play" id="play-btn" onclick="togglePlay()">▶</button>
-            <button class="btn control-btn" onclick="forward10()" title="Tua nhanh 10s">⏩ 10s</button>
-            <button class="btn" onclick="nextSong()">⏭</button>
-            <button id="repeat-btn" class="btn" onclick="toggleRepeat()">🔁</button>
+      <div class="controls spotify-style-controls">
+            <button id="shuffle-btn" class="btn-spotify" onclick="toggleShuffle()" title="Phát ngẫu nhiên">
+                <i class="fas fa-random"></i>
+            </button>
+            <button class="btn-spotify" onclick="prevSong()" title="Bài trước">
+                <i class="fas fa-step-backward"></i>
+            </button>
+            <button class="btn-spotify control-btn-10s" onclick="rewind10()" title="Tua lại 10s">
+                <i class="fas fa-undo-alt"></i> 10s
+            </button>
+            <button class="btn-spotify btn-play-spotify" id="play-btn" onclick="togglePlay()" title="Phát/Tạm dừng">
+                <i class="fas fa-play"></i> <!-- Khi phát sẽ đổi thành <i class="fas fa-pause"></i> bằng JS -->
+            </button>
+            <button class="btn-spotify control-btn-10s" onclick="forward10()" title="Tua nhanh 10s">
+                <i class="fas fa-redo-alt"></i> 10s
+            </button>
+            <button class="btn-spotify" onclick="nextSong()" title="Bài tiếp">
+                <i class="fas fa-step-forward"></i>
+            </button>
+            <button id="repeat-btn" class="btn-spotify" onclick="toggleRepeat()" title="Lặp lại">
+                <i class="fas fa-retweet"></i>
+            </button>
         </div>
         <div class="progress-container">
             <span id="current-time" class="time-text">0:00</span>
