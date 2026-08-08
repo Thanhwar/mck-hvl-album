@@ -140,6 +140,43 @@
             gap: 20px;
             padding: 24px 24px 16px 24px;
         }
+        /* 🔍 Ô TÌM KIẾM CHUẨN SPOTIFY */
+        .search-container {
+            position: relative;
+            margin: 12px 24px;
+            max-width: 360px;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border-radius: 50px;
+            border: none;
+            background-color: #242424;
+            color: #ffffff;
+            font-size: 0.9rem;
+            outline: none;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-container input:focus {
+            background-color: #2a2a2a;
+            box-shadow: 0 0 0 2px #ffffff;
+        }
+
+        .search-container input::placeholder {
+            color: #b3b3b3;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #b3b3b3;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
 
         .header-cover {
             width: 140px !important;
@@ -310,12 +347,17 @@
             .player-right { width: auto; }
             .now-playing { width: 35%; }
         }
-</style>F
+</style>
 </head>
 <body>
 
 <div class="main-container">
     <div class="content-panel" id="content-panel">
+        <!-- 🔍 Khung Tìm Kiếm Phong Cách Spotify -->
+<div class="search-container">
+    <i class="fas fa-search search-icon"></i>
+    <input type="text" id="search-input" onkeyup="filterSongs()" placeholder="Bạn muốn nghe bài gì?">
+</div>
         <div class="song-header">
             <img id="main-cover" class="header-cover" src="" alt="Cover">
             <div class="header-info">
@@ -2547,6 +2589,24 @@ function rewind10() {
         nextSong();            // Mặc định chuyển sang bài tiếp theo
     }
 });
+// 🔍 Hàm lọc danh sách bài hát theo từ khóa gõ vào
+    function filterSongs() {
+        const input = document.getElementById('search-input');
+        const filter = input.value.toLowerCase().trim();
+        const songItems = document.querySelectorAll('.song-item'); // Các item bài hát trong danh sách
+
+        songItems.forEach(item => {
+            const title = item.querySelector('.song-item-title') ? item.querySelector('.song-item-title').innerText.toLowerCase() : '';
+            const artist = item.querySelector('.song-item-artist') ? item.querySelector('.song-item-artist').innerText.toLowerCase() : '';
+
+            // Nếu tên bài hát hoặc ca sĩ có chứa từ khóa thì hiện, không thì ẩn
+            if (title.includes(filter) || artist.includes(filter)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
 
     loadSong(currentIndex);
 </script>
