@@ -2727,7 +2727,6 @@ Suy nghĩ làm gì cho tốn thời gian`,
       const durationTimeEl = document.getElementById("duration-time");
       const lyricText = document.getElementById("lyric-text");
       const volumeInput = document.getElementById("volume");
-
       function loadSong(index) {
         currentIndex = index;
         const song = playlist[currentIndex];
@@ -2743,6 +2742,29 @@ Suy nghĩ làm gì cho tốn thời gian`,
 
         audio.src = song.src;
         lyricText.textContent = song.lyrics || "♪ Chưa có lời bài hát ♪";
+
+        // 📱 TRUYỀN THÔNG TIN RA MÀN HÌNH KHÓA IPHONE / ĐIỆN THOẠI
+        if ("mediaSession" in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: song.title,
+            artist: song.artist,
+            album: "HVL Album",
+            artwork: [
+              { src: song.cover, sizes: "96x96", type: "image/png" },
+              { src: song.cover, sizes: "128x128", type: "image/png" },
+              { src: song.cover, sizes: "192x192", type: "image/png" },
+              { src: song.cover, sizes: "256x256", type: "image/png" },
+              { src: song.cover, sizes: "384x384", type: "image/png" },
+              { src: song.cover, sizes: "512x512", type: "image/png" },
+            ],
+          });
+
+          // Gán hành vi cho các nút điều khiển trên màn hình khóa
+          navigator.mediaSession.setActionHandler("play", togglePlay);
+          navigator.mediaSession.setActionHandler("pause", togglePlay);
+          navigator.mediaSession.setActionHandler("previoustrack", prevSong);
+          navigator.mediaSession.setActionHandler("nexttrack", nextSong);
+        }
 
         renderQueue();
       }
