@@ -588,13 +588,21 @@
           width: 100% !important;
           z-index: 9999 !important;
           background-color: #000000 !important;
+          padding: 6px 8px !important;
+          gap: 4px !important;
         }
 
+        /* Thu gọn thông tin bài hát đang phát góc trái */
         .now-playing {
-          width: 110px !important;
-          max-width: 110px !important;
+          width: 75px !important;
+          max-width: 75px !important;
           flex-shrink: 0 !important;
           overflow: hidden !important;
+        }
+
+        .now-playing-img {
+          width: 38px !important;
+          height: 38px !important;
         }
 
         .now-playing-title,
@@ -606,28 +614,47 @@
           overflow: hidden !important;
           text-overflow: ellipsis !important;
           display: block !important;
+          font-size: 0.7rem !important;
         }
 
         .player-center {
           flex: 1 !important;
-          padding: 0 4px !important;
+          padding: 0 !important;
+          max-width: none !important;
         }
 
         .controls {
-          gap: 4px !important;
+          gap: 2px !important;
         }
 
+        /* Ẩn bớt 2 nút tua 10s trên điện thoại để tiết kiệm diện tích */
         .control-btn-10s {
-          font-size: 11px !important;
-          padding: 0 2px !important;
+          display: none !important;
         }
 
+        /* Giữ hiển thị các nút chức năng bên phải */
+        .player-right {
+          width: auto !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 4px !important;
+          flex-shrink: 0 !important;
+        }
+
+        .player-right .btn {
+          font-size: 14px !important;
+          padding: 4px !important;
+          width: 30px !important;
+          height: 30px !important;
+        }
+
+        /* Ẩn thanh kéo volume (vì điện thoại dùng nút bấm cứng bên hông) nhưng giữ lại nút Loa */
         .volume-bar {
           display: none !important;
         }
 
         .volume-container {
-          display: none !important;
+          display: flex !important;
         }
 
         .main-container {
