@@ -576,6 +576,96 @@
         .player-right {
           width: auto;
         }
+        /* 🌙 CSS BẢNG HẸN GIỜ TẮT NHẠC */
+        .timer-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: flex-end;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.3s, opacity 0.3s ease;
+        }
+
+        .timer-modal.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .timer-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .timer-content {
+            position: relative;
+            width: 100%;
+            background: #282828;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 16px 20px 24px 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            z-index: 10001;
+        }
+
+        .timer-modal.show .timer-content {
+            transform: translateY(0);
+        }
+
+        .timer-drag-handle {
+            width: 40px;
+            height: 4px;
+            background: #555;
+            border-radius: 2px;
+            margin: 0 auto 16px auto;
+        }
+
+        .timer-title {
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .timer-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .timer-opt {
+            background: transparent;
+            border: none;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            text-align: left;
+            padding: 10px 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .timer-opt .check-icon { display: none; color: #1ed760; }
+        .timer-opt.active { color: #1ed760; font-weight: bold; }
+        .timer-opt.active .check-icon { display: inline-block; }
+
+        .timer-cancel-btn {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 10px 0;
+            cursor: pointer;
+        }
       }
     </style>
   </head>
@@ -702,34 +792,32 @@
         </div>
       </div>
 
-      <div class="player-right">
-        <button
-          id="queue-btn"
-          class="btn"
-          onclick="toggleQueuePanel()"
-          title="Danh sách chờ"
-        >
-          📜
-        </button>
-        <div class="volume-container">
-          <button class="btn" id="volume-icon" onclick="toggleMute()">
-            🔊
-          </button>
-          <input
-            type="range"
-            id="volume"
-            class="volume-bar"
-            value="100"
-            min="0"
-            max="100"
-            oninput="changeVolume()"
-          />
+     <div class="player-right">
+            <button id="queue-btn" class="btn" onclick="toggleQueuePanel()" title="Danh sách chờ">📋</button>
+            <button id="timer-btn" class="btn" onclick="openTimerModal()" title="Hẹn giờ tắt nhạc">🕒</button>
+            
+            <div class="volume-container">
+                <button class="btn" id="volume-icon" onclick="toggleMute()">🔊</button>
+                <input type="range" id="volume" class="volume-bar" value="100" min="0" max="100" oninput="changeVolume()">
+            </div>
         </div>
-      </div>
+        <!-- 🌙 MODAL HẸN GIỜ TẮT NHẠC (KIỂU TRƯỢT DƯỚI LÊN) -->
+<div id="timer-modal" class="timer-modal">
+    <div class="timer-overlay" onclick="closeTimerModal()"></div>
+    <div class="timer-content">
+        <div class="timer-drag-handle"></div>
+        <h3 class="timer-title">Hãy chọn hẹn giờ bên dưới</h3>
+        <div class="timer-options">
+            <button class="timer-opt active" onclick="setTimer(0, this)">Tắt hẹn giờ <i class="fas fa-check check-icon"></i></button>
+            <button class="timer-opt" onclick="setTimer(15, this)">15 phút <i class="fas fa-check check-icon"></i></button>
+            <button class="timer-opt" onclick="setTimer(30, this)">30 phút <i class="fas fa-check check-icon"></i></button>
+            <button class="timer-opt" onclick="setTimer(45, this)">45 phút <i class="fas fa-check check-icon"></i></button>
+            <button class="timer-opt" onclick="setTimer(60, this)">60 phút <i class="fas fa-check check-icon"></i></button>
+            <button class="timer-opt" onclick="customTimer(this)">Tuỳ chỉnh <i class="fas fa-check check-icon"></i></button>
+        </div>
+        <button class="timer-cancel-btn" onclick="closeTimerModal()">Hủy</button>
     </div>
-
-    <audio id="audio-player" playsinline preload="metadata"></audio>
-
+</div>
     <script>
       const playlist = [
         {
@@ -2903,79 +2991,90 @@ Suy nghĩ làm gì cho tốn thời gian`,
         btn.classList.toggle("active");
       }
 
-      audio.addEventListener("timeupdate", () => {
+      // 💾 LƯU & KHÔI PHỤC BÀI HÁT ĐANG NGHE VÀO LOCALSTORAGE
+    audio.addEventListener('timeupdate', () => {
         if (audio.duration) {
-          progress.value = (audio.currentTime / audio.duration) * 100;
-          currentTimeEl.textContent = formatTime(audio.currentTime);
-          durationTimeEl.textContent = formatTime(audio.duration);
+            progress.value = (audio.currentTime / audio.duration) * 100;
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+            durationTimeEl.textContent = formatTime(audio.duration);
+
+            localStorage.setItem('saved_song_index', currentIndex);
+            localStorage.setItem('saved_song_time', audio.currentTime);
         }
-      });
+    });
 
-      function seekSong() {
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedIndex = localStorage.getItem('saved_song_index');
+        const savedTime = localStorage.getItem('saved_song_time');
+
+        if (savedIndex !== null) {
+            currentIndex = parseInt(savedIndex);
+            loadSong(currentIndex);
+            if (savedTime !== null) {
+                audio.currentTime = parseFloat(savedTime);
+            }
+        } else {
+            loadSong(0);
+        }
+    });
+
+    function seekSong() {
         audio.currentTime = (progress.value / 100) * audio.duration;
-      }
+    }
 
-      function formatTime(seconds) {
+    function formatTime(seconds) {
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
-      }
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
 
-      audio.addEventListener("ended", () => {
-        if (isRepeat) {
-          audio.currentTime = 0;
-          audio.play();
+    // 🌙 LOGIC HẸN GIỜ TẮT NHẠC
+    let timerTimeout = null;
+
+    function openTimerModal() {
+        document.getElementById('timer-modal').classList.add('show');
+    }
+
+    function closeTimerModal() {
+        document.getElementById('timer-modal').classList.remove('show');
+    }
+
+    function setTimer(minutes, btnEl) {
+        if (timerTimeout) clearTimeout(timerTimeout);
+
+        document.querySelectorAll('.timer-opt').forEach(el => el.classList.remove('active'));
+        if(btnEl) btnEl.classList.add('active');
+
+        const timerBtn = document.getElementById('timer-btn');
+
+        if (minutes > 0) {
+            timerBtn.classList.add('active');
+            timerBtn.title = `Đã hẹn giờ: ${minutes} phút`;
+            
+            timerTimeout = setTimeout(() => {
+                audio.pause();
+                updatePlayIcons(false);
+                alert(`⏰ Đã hết ${minutes} phút hẹn giờ. Nhạc đã tự động tắt!`);
+                timerBtn.classList.remove('active');
+            }, minutes * 60 * 1000);
         } else {
-          nextSong();
+            timerBtn.classList.remove('active');
+            timerBtn.title = "Hẹn giờ tắt nhạc";
         }
-      });
+        closeTimerModal();
+    }
 
-      function filterSongs() {
-        const input = document.getElementById("search-input");
-        if (!input) return;
-
-        const filter = input.value
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .trim();
-        const songItems = document.querySelectorAll(".song-item");
-
-        songItems.forEach((item) => {
-          const titleEl =
-            item.querySelector(".song-item-title") ||
-            item.querySelector(".song-title");
-          const artistEl =
-            item.querySelector(".song-item-artist") ||
-            item.querySelector(".song-artist");
-
-          const title = titleEl
-            ? titleEl.innerText
-                .toLowerCase()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-            : "";
-          const artist = artistEl
-            ? artistEl.innerText
-                .toLowerCase()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-            : "";
-
-          if (title.includes(filter) || artist.includes(filter)) {
-            item.style.setProperty("display", "flex", "important");
-          } else {
-            item.style.setProperty("display", "none", "important");
-          }
-        });
-
-        const queuePanel = document.querySelector(".queue-panel");
-        if (queuePanel && filter.length > 0) {
-          queuePanel.classList.remove("hidden", "hidden-mobile");
+    function customTimer(btnEl) {
+        const input = prompt("Nhập số phút bạn muốn hẹn giờ tắt nhạc:", "20");
+        if (input !== null) {
+            const mins = parseInt(input);
+            if (!isNaN(mins) && mins > 0) {
+                setTimer(mins, btnEl);
+            } else {
+                alert("Vui lòng nhập số phút hợp lệ!");
+            }
         }
-      }
-
-      loadSong(currentIndex);
+    }
     </script>
   </body>
 </html>
