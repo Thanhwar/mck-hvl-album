@@ -713,6 +713,72 @@
           width: auto;
         }
       }
+      .player-right {
+        width: auto;
+      }
+
+      /* 🔍 CSS MENU KẾT QUẢ TÌM KIẾM XỔ XUỐNG (DROPDOWN) */
+      .search-container {
+        position: relative;
+      }
+
+      .search-results-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #282828;
+        border-radius: 8px;
+        margin-top: 6px;
+        max-height: 280px;
+        overflow-y: auto;
+        z-index: 99999;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+        display: none;
+      }
+
+      .search-results-dropdown.show {
+        display: block;
+      }
+
+      .search-result-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .search-result-item:hover {
+        background: #3e3e3e;
+      }
+
+      .search-result-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 4px;
+        object-fit: cover;
+      }
+
+      .search-result-info {
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .search-result-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .search-result-artist {
+        font-size: 0.75rem;
+        color: #b3b3b3;
+      }
     </style>
   </head>
 
@@ -727,9 +793,12 @@
           <input
             type="text"
             id="search-input"
-            onkeyup="filterSongs()"
+            oninput="filterSongs()"
+            onfocus="filterSongs()"
             placeholder="Bạn muốn nghe bài gì?"
           />
+          <!-- 🔍 BẢNG KẾT QUẢ TÌM KIẾM XỔ XUỐNG DƯỚI -->
+          <div id="search-results" class="search-results-dropdown"></div>
         </div>
         <div class="song-header">
           <img id="main-cover" class="header-cover" src="" alt="Cover" />
@@ -848,7 +917,7 @@
           onclick="toggleQueuePanel()"
           title="Danh sách chờ"
         >
-          📜
+          📄
         </button>
         <button
           id="timer-btn"
@@ -856,7 +925,7 @@
           onclick="openTimerModal()"
           title="Hẹn giờ tắt nhạc"
         >
-          🌙
+          🕒
         </button>
 
         <div class="volume-container">
@@ -877,7 +946,7 @@
     </div>
     <!-- Đóng player-bar -->
 
-    <!-- 🌙 MODAL HẸN GIỜ TẮT NHẠC -->
+    <!-- 🕒 MODAL HẸN GIỜ TẮT NHẠC -->
     <div id="timer-modal" class="timer-modal">
       <div class="timer-overlay" onclick="closeTimerModal()"></div>
       <div class="timer-content">
@@ -2949,6 +3018,20 @@ Suy nghĩ làm gì cho tốn thời gian`,
           navigator.mediaSession.setActionHandler("previoustrack", prevSong);
           navigator.mediaSession.setActionHandler("nexttrack", nextSong);
         }
+        // 📱 ĐĂNG KÝ VỚI TRÌNH QUẢN LÝ MEDIA CỦA HỆ ĐIỀU HÀNH
+        if ("mediaSession" in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: song.title,
+            artist: song.artist,
+            album: "HVL Album",
+            artwork: [{ src: song.cover, sizes: "512x512", type: "image/png" }],
+          });
+
+          navigator.mediaSession.setActionHandler("play", togglePlay);
+          navigator.mediaSession.setActionHandler("pause", togglePlay);
+          navigator.mediaSession.setActionHandler("previoustrack", prevSong);
+          navigator.mediaSession.setActionHandler("nexttrack", nextSong);
+        }
 
         renderQueue();
       }
@@ -3093,21 +3176,110 @@ Suy nghĩ làm gì cho tốn thời gian`,
       }
 
       // 🔍 HÀM TÌM KIẾM BÀI HÁT
+      // 🔍 TÌM KIẾM BÀI HÁT XỔ MENU NẰM DƯỚI THANH SEARCH
       function filterSongs() {
         const input = document.getElementById("search-input");
-        if (!input) return;
-        const filter = input.value.toLowerCase();
-        const items = document.querySelectorAll("#queue-list .song-item");
-        items.forEach((item) => {
-          const text = item.textContent.toLowerCase();
-          item.style.display = text.includes(filter) ? "flex" : "none";
-        });
+        const resultsContainer = document.getElementById("search-results");
+        if (!input || !resultsContainer) return;
+
+        const query = input.value.toLowerCase().trim();
+
+        if (query.length === 0) {
+          resultsContainer.innerHTML = "";
+          resultsContainer.classList.remove("show");
+          return;
+        }
+
+        const matches = playlist
+          .map((song, index) => ({ song, index }))
+          .filter(
+            (item) =>
+              item.song.title.toLowerCase().includes(query) ||
+              item.song.artist.toLowerCase().includes(query),
+          );
+
+        if (matches.length === 0) {
+          resultsContainer.innerHTML = `<div style="padding: 12px; font-size: 0.85rem; color: #b3b3b3; text-align: center;">Không tìm thấy bài hát</div>`;
+          resultsContainer.classList.add("show");
+          return;
+        }
+
+        resultsContainer.innerHTML = matches
+          .map(
+            (item) => `
+          <div class="search-result-item" onclick="selectSearchResult(${item.index})">
+            <img class="search-result-img" src="${item.song.cover}" alt="Cover">
+            <div class="search-result-info">
+              <div class="search-result-title">${item.song.title}</div>
+              <div class="search-result-artist">${item.song.artist}</div>
+            </div>
+          </div>
+        `,
+          )
+          .join("");
+
+        resultsContainer.classList.add("show");
       }
 
+      // Phát bài hát khi chọn từ kết quả tìm kiếm
+      function selectSearchResult(index) {
+        loadSong(index);
+        if (audio) audio.play();
+        updatePlayIcons(true);
+
+        const input = document.getElementById("search-input");
+        const resultsContainer = document.getElementById("search-results");
+        if (input) input.value = "";
+        if (resultsContainer) {
+          resultsContainer.innerHTML = "";
+          resultsContainer.classList.remove("show");
+        }
+      }
+
+      // Tự động ẩn bảng kết quả khi bấm ra ngoài
+      document.addEventListener("click", (e) => {
+        const searchContainer = document.querySelector(".search-container");
+        const resultsContainer = document.getElementById("search-results");
+        if (
+          searchContainer &&
+          !searchContainer.contains(e.target) &&
+          resultsContainer
+        ) {
+          resultsContainer.classList.remove("show");
+        }
+      });
+
       // 🔁 TỰ CHUYỂN BÀI KHI HẾT
+      // 🔁 TỰ CHUYỂN BÀI KHI HẾT (TỐI ƯU KHI TẮT MÀN HÌNH / BẬT TIẾT KIỆM PIN)
       if (audio) {
         audio.addEventListener("ended", () => {
-          if (!isRepeat) nextSong();
+          if (!isRepeat) {
+            nextSong();
+            // Đảm bảo kích hoạt lại lệnh play() dạng Promise để vượt qua rào cản tiết kiệm pin
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  updatePlayIcons(true);
+                })
+                .catch((err) => {
+                  console.log("Autoplay blocked by OS battery saver:", err);
+                });
+            }
+          }
+        });
+
+        // 🔊 DUY TRÌ TRẠNG THÁI MEDIA SESSION KHI PHÁT VÀ TẠM DỪNG
+        audio.addEventListener("play", () => {
+          if ("mediaSession" in navigator) {
+            navigator.mediaSession.playbackState = "playing";
+          }
+        });
+
+        audio.addEventListener("pause", () => {
+          if ("mediaSession" in navigator) {
+            navigator.mediaSession.playbackState = "paused";
+          }
         });
 
         // 💾 LƯU VÀO LOCALSTORAGE
@@ -3126,7 +3298,7 @@ Suy nghĩ làm gì cho tốn thời gian`,
         });
       }
 
-      // 🔄 KHÔI PHỤC BÀI HÁT
+      // 🔄 KHÔI PHỤC BÀI HÁT (TỐI ƯU CHUẨN ĐIỆN THOẠI & PC)
       window.addEventListener("DOMContentLoaded", () => {
         const savedIndex = localStorage.getItem("saved_song_index");
         const savedTime = localStorage.getItem("saved_song_time");
@@ -3134,14 +3306,26 @@ Suy nghĩ làm gì cho tốn thời gian`,
         if (savedIndex !== null && !isNaN(parseInt(savedIndex))) {
           currentIndex = parseInt(savedIndex);
           loadSong(currentIndex);
+
           if (savedTime !== null && audio) {
-            audio.addEventListener(
-              "loadedmetadata",
-              () => {
-                audio.currentTime = parseFloat(savedTime);
-              },
-              { once: true },
-            );
+            const restoreTime = parseFloat(savedTime);
+            const setAudioTime = () => {
+              if (restoreTime > 0 && audio.duration) {
+                audio.currentTime = restoreTime;
+                if (progress)
+                  progress.value = (restoreTime / audio.duration) * 100;
+                if (currentTimeEl)
+                  currentTimeEl.textContent = formatTime(restoreTime);
+              }
+            };
+
+            if (audio.readyState >= 1) {
+              setAudioTime();
+            } else {
+              audio.addEventListener("loadedmetadata", setAudioTime, {
+                once: true,
+              });
+            }
           }
         } else {
           loadSong(0);
